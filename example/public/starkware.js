@@ -1,7 +1,7 @@
 "use strict";
 
 // updates title to display package version
-updateTitle();
+window.updateTitle();
 
 const WalletConnectStarkwareProvider = window.WalletConnectStarkwareProvider.default;
 
@@ -19,10 +19,17 @@ async function onInit() {
   const starkKey = accounts[0];
   console.log("starkKey", starkKey); // eslint-disable-line
 
-  updateSessionDetails({ accounts });
+  updateSessionDetails({ starkKey });
+
+  provider.on("close", () => {
+    // Delete provider
+    provider = null;
+
+    onDisconnect();
+  });
 }
 
-async function updateSessionDetails({ accounts, chainId }) {
+async function updateSessionDetails({ starkKey }) {
   const containerEl = document.getElementById("page-actions");
   const pTags = containerEl.getElementsByTagName("p");
   if (pTags.length === 1) {
@@ -30,57 +37,26 @@ async function updateSessionDetails({ accounts, chainId }) {
     textEl.innerHTML = "Connected!";
 
     const accountEl = document.createElement("p");
-    accountEl.innerHTML = `Account: ${accounts[0]}`;
-    insertAfter(accountEl, textEl);
-
-    const chainData = await getChainData(chainId);
-
-    const chainEl = document.createElement("p");
-    chainEl.innerHTML = `Chain: ${chainData.name}`;
-    insertAfter(chainEl, accountEl);
-
-    const buttonEl = containerEl.getElementsByTagName("button")[0];
-    buttonEl.innerText = "CLICK";
-    buttonEl.onclick = () => console.log("CLICK"); // eslint-disable-line
+    accountEl.innerHTML = `Stark Key: ${starkKey}`;
+    window.insertAfter(accountEl, textEl);
   } else {
+    const accountEl = document.createElement("p");
+    accountEl.innerHTML = `Stark Key: ${starkKey}`;
+  }
+}
+
+async function onDisconnect() {
+  const containerEl = document.getElementById("page-actions");
+  const pTags = containerEl.getElementsByTagName("p");
+
+  const textEl = containerEl.getElementsByTagName("p")[0];
+  textEl.innerHTML = "Disconnected!";
+
+  const buttonEl = containerEl.getElementsByTagName("button")[0];
+  buttonEl.innerText = "Connect";
+  buttonEl.onclick = onInit;
+  if (pTags.length > 1) {
     const accountEl = containerEl.getElementsByTagName("p")[1];
-    accountEl.innerHTML = `Account: ${accounts[0]}`;
-
-    const chainData = await getChainData(chainId);
-
-    const chainEl = containerEl.getElementsByTagName("p")[2];
-    chainEl.innerHTML = `Chain: ${chainData.name}`;
+    accountEl.remove();
   }
-}
-
-let supportedChains = null;
-
-async function getChainData(chainId) {
-  if (!supportedChains) {
-    supportedChains = await getJsonFile("./chains.json");
-  }
-
-  const chainData = supportedChains.filter(chain => chain.chain_id === chainId)[0];
-
-  if (!chainData) {
-    throw new Error("ChainId missing or not supported");
-  }
-
-  return chainData;
-}
-
-async function getJsonFile(path) {
-  const res = await fetch(path);
-  const json = await res.json();
-  return json;
-}
-
-async function updateTitle() {
-  const { version } = await getJsonFile("../../lerna.json");
-  const title = document.getElementById("page-title");
-  title.innerHTML = title.innerHTML.replace(/\sv(\w.)+.\w+/gi, "") + ` v${version}`;
-}
-
-function insertAfter(newNode, referenceNode) {
-  referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 }
