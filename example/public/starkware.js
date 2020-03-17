@@ -9,11 +9,15 @@ let provider = null;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function onInit() {
-  // Create provider
+  //  Create StarkwareProvider Provider
   provider = new WalletConnectStarkwareProvider();
 
-  // Enable provider
+  //  Enable session (triggers QR Code modal)
   const accounts = await provider.enable();
+
+  //  Get StarkKey
+  const starkKey = accounts[0];
+  console.log("starkKey", starkKey); // eslint-disable-line
 
   updateSessionDetails({ accounts });
 }
