@@ -59,7 +59,7 @@
     "webpack-cli": "3.3.10"
   },
   "dependencies": {
-    "@walletconnect/browser-crypto": "../../helpers/browser-crypto/",
+    "@walletconnect/browser-crypto": "https://gitpkg.now.sh/yoheinishikubo/walletconnect-monorepo/packages/helpers/browser-crypto?next",
     "@walletconnect/core": "^1.0.0-beta.72",
     "@walletconnect/types": "^1.0.0-beta.72",
     "@walletconnect/utils": "^1.0.0-beta.72"
