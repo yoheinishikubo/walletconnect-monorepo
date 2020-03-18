@@ -18,8 +18,10 @@ const AES_ALGORITHM = "AES-CBC";
 const AES_LENGTH = 256;
 const HMAC_ALGORITHM = "SHA-256";
 
+const subtle = window.crypto.subtle || window.SubtleCrypto;
+
 export async function exportKey(cryptoKey: CryptoKey): Promise<ArrayBuffer> {
-  const buffer: ArrayBuffer = await window.crypto.subtle.exportKey("raw", cryptoKey);
+  const buffer: ArrayBuffer = await subtle.exportKey("raw", cryptoKey);
   return buffer;
 }
 
@@ -35,13 +37,13 @@ export async function importKey(
   const algoParams: AesKeyAlgorithm | HmacImportParams =
     type === AES_ALGORITHM ? aesParams : hmacParams;
   const usages: string[] = type === AES_ALGORITHM ? ["encrypt", "decrypt"] : ["sign", "verify"];
-  const cryptoKey = await window.crypto.subtle.importKey("raw", buffer, algoParams, true, usages);
+  const cryptoKey = await subtle.importKey("raw", buffer, algoParams, true, usages);
   return cryptoKey;
 }
 
 export async function generateKey(length?: number): Promise<ArrayBuffer> {
   const _length = length || 256;
-  const cryptoKey = await window.crypto.subtle.generateKey(
+  const cryptoKey = await subtle.generateKey(
     {
       length: _length,
       name: AES_ALGORITHM,
@@ -55,7 +57,7 @@ export async function generateKey(length?: number): Promise<ArrayBuffer> {
 
 export async function createHmac(data: ArrayBuffer, key: ArrayBuffer): Promise<ArrayBuffer> {
   const cryptoKey: CryptoKey = await importKey(key, "HMAC");
-  const signature = await window.crypto.subtle.sign(
+  const signature = await subtle.sign(
     {
       length: 256,
       name: "HMAC",
@@ -89,7 +91,7 @@ export async function aesCbcEncrypt(
   iv: ArrayBuffer,
 ): Promise<ArrayBuffer> {
   const cryptoKey: CryptoKey = await importKey(key, AES_ALGORITHM);
-  const result: ArrayBuffer = await window.crypto.subtle.encrypt(
+  const result: ArrayBuffer = await subtle.encrypt(
     {
       iv,
       name: AES_ALGORITHM,
@@ -106,7 +108,7 @@ export async function aesCbcDecrypt(
   iv: ArrayBuffer,
 ): Promise<ArrayBuffer> {
   const cryptoKey: CryptoKey = await importKey(key, AES_ALGORITHM);
-  const result: ArrayBuffer = await window.crypto.subtle.decrypt(
+  const result: ArrayBuffer = await subtle.decrypt(
     {
       iv,
       name: AES_ALGORITHM,
